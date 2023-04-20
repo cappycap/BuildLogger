@@ -2,3 +2,7 @@ name: 'BuildLogger'
 version: 1.0
 main: cappycap.buildlogger.BuildLogger
 api-version: '1.19'
+commands:
+  dataset:
+    description: Handle dataset-related operations
+    usage: /<command> <add>
