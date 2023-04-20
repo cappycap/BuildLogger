@@ -1,9 +1,11 @@
 package cappycap.buildlogger;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
 public class DatabaseHelper {
     private final String url;
+    private static final Logger LOGGER = Logger.getLogger("BuildLogger");
 
     public DatabaseHelper(String fileName) {
         url = "jdbc:sqlite:" + fileName;
@@ -46,7 +48,9 @@ public class DatabaseHelper {
             // Get id of statement.
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                return rs.getInt(1);
+                int insertedId = rs.getInt(1);
+                LOGGER.info("Inserted row with ID: " + insertedId + ", labels: " + labels + ", data: " + data);
+                return insertedId;
             } else {
                 return -1;
             }

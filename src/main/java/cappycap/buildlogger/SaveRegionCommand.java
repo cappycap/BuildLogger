@@ -17,8 +17,11 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import java.util.logging.Logger;
+
 public class SaveRegionCommand implements CommandExecutor {
     private final BuildLogger plugin;
+    private static final Logger LOGGER = Logger.getLogger("BuildLogger");
 
     public SaveRegionCommand(BuildLogger plugin) {
         this.plugin = plugin;
