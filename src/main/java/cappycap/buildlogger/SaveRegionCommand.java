@@ -13,6 +13,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 public class SaveRegionCommand implements CommandExecutor {
     private final BuildLogger plugin;
 
@@ -39,8 +43,18 @@ public class SaveRegionCommand implements CommandExecutor {
             try {
                 CuboidRegion region = getSelectedRegion(wePlugin, player);
                 if (region != null) {
-                    plugin.recordRegion(region, labels);
-                    sender.sendMessage("Dataset entry saved with ID: ");
+                    int id = plugin.recordRegion(region, labels);
+
+                    TextComponent message = new TextComponent("Dataset entry saved with ID: ");
+                    message.setColor(ChatColor.WHITE);
+
+                    TextComponent idComponent = new TextComponent(Integer.toString(id));
+                    idComponent.setColor(ChatColor.YELLOW);
+                    idComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, Integer.toString(id)));
+
+                    message.addExtra(idComponent);
+
+                    sender.spigot().sendMessage(message);
                     return true;
                 } else {
                     sender.sendMessage("No region selected.");

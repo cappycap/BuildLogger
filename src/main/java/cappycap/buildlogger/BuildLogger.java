@@ -29,7 +29,7 @@ public class BuildLogger extends JavaPlugin {
     }
 
     // Save a region's block information as a 3D matrix in the SQLite file.
-    public void recordRegion(CuboidRegion region, String labels) {
+    public int recordRegion(CuboidRegion region, String labels) {
 
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         BlockVector3 min = region.getMinimumPoint();
@@ -53,7 +53,9 @@ public class BuildLogger extends JavaPlugin {
         String data = new Gson().toJson(blocks);
 
         // Save the JSON string and labels to the SQLite database.
-        dbHelper.saveRegion(data, labels);
+        int id = dbHelper.saveRegion(data, labels);
+
+        return id;
 
     }
 

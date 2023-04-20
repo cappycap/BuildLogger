@@ -1,10 +1,6 @@
 package cappycap.buildlogger;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
+import java.sql.*;
 
 public class DatabaseHelper {
     private final String url;
@@ -39,7 +35,7 @@ public class DatabaseHelper {
         }
     }
 
-    public void saveRegion(String data, String labels) {
+    public int saveRegion(String data, String labels) {
         String sql = "INSERT INTO regions(labels, data) VALUES(?, ?)";
 
         try (Connection conn = connect();
@@ -47,8 +43,16 @@ public class DatabaseHelper {
             pstmt.setString(1, labels);
             pstmt.setString(2, data);
             pstmt.executeUpdate();
+            // Get id of statement.
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return -1;
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return -1;
         }
     }
 
