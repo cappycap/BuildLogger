@@ -1,0 +1,4 @@
+name: 'BuildLogger'
+version: 1.0
+main: cappycap.buildlogger.BuildLogger
+api-version: '1.19'
