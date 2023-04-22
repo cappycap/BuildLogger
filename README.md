@@ -25,10 +25,11 @@ Next, run this command and add a list a minimum of 5 but as many labels as you w
 
 When capturing larger builds, use more labels to better describe what encapsulates the space, or split up the build into smaller dataset entries.
 
+Think about small scenery objects too! Objects such as trees, flower paths, lampposts, etc. are builds that could be described in 5 labels. 
 ## Preprocessing Features
 
 ### Remove unnecessary air blocks when saving regions.
-For a given matrix represented by X width, Y height, and Z length, for every dimension **D** we find a **D<sub>min</sub>** and **D<sub>max</sub>** representing the first and last non-air block in the region. We create a new matrix with these mins and maxes as bounds.
+For a given matrix represented by X width, Y height, and Z length, for every dimension **D** we find a **D<sub>min</sub>** and **D<sub>max</sub>** representing the first and last non-air block in the dimension. We create a new matrix with these mins and maxes as bounds.
 
 ### Block Simplification (TODO)
 There are **973 blocks** natively tracked as integers in our matrices. If we were to allow all possible blocks into training, it would significantly increase training time.
@@ -38,7 +39,11 @@ Or, simplify large sections of blocks to a similar block, like considering all w
 
 No matter what, our database should store both a "pure" matrix with 973 blocks of representation and then potentially other simplified ones.
 
-## TODO
+### ... Other methods (TODO)
+
+Data will have more preprocessing done within Python when training the model, but we can also explore other options here.
+
+## Planned Features
 
 - Implement command autocompletion
 - Implement a /dataset help command

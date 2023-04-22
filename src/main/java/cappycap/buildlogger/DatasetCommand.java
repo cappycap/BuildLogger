@@ -27,30 +27,6 @@ public class DatasetCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-        if (args.length > 0) {
-            String subcommand = args[0];
-
-            if ("add".equalsIgnoreCase(subcommand) && sender instanceof Player) {
-
-                LOGGER.info("Running subcommand "+subcommand);
-                // Remove the 'add' subcommand from the arguments array
-                String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
-
-                String labels = String.join(" ", newArgs);
-
-                LOGGER.info("Passing labels "+labels);
-                // Call the onCommand method of SaveRegionCommand with the new arguments
-                return saveRegionCommand.onCommand(sender, command, label, new String[]{labels});
-            }
-        }
-
-        return false;
-    }
-
-
     // Autocomplete our commands for ease of use.
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
@@ -71,6 +47,36 @@ public class DatasetCommand implements CommandExecutor, TabCompleter {
 
         return null;
     }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        if (args.length > 0) {
+            String subcommand = args[0];
+
+            if ("add".equalsIgnoreCase(subcommand) && sender instanceof Player) {
+
+                LOGGER.info("Running subcommand "+subcommand);
+                // Remove the 'add' subcommand from the arguments array
+                String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+
+                String labels = String.join(" ", newArgs);
+
+                LOGGER.info("Passing labels "+labels);
+                // Call the onCommand method of SaveRegionCommand with the new arguments
+                return saveRegionCommand.onCommand(sender, command, label, new String[]{labels});
+            } else if ("view".equalsIgnoreCase(subcommand) && sender instanceof Player) {
+                try {
+                    viewRegion(sender, args[1]);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     // Helper function for viewing region data.
     private void viewRegion(CommandSender sender, String id) throws SQLException {
