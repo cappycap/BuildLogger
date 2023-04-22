@@ -1,7 +1,11 @@
 package cappycap.buildlogger;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class DatabaseHelper {
     private final String url;
@@ -70,6 +74,24 @@ public class DatabaseHelper {
         }
     }
 
+    // Get the data entry only.
+    public String getRegionData(int id)  throws SQLException {
+        String sql = "SELECT data FROM regions WHERE id = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("data");
+                }
+            }
+        }
+
+        return null;
+    }
+
     public CommandResult getRegion(String id) throws SQLException {
         String sql = "SELECT * FROM regions WHERE id = ?";
 
@@ -85,6 +107,51 @@ public class DatabaseHelper {
         }
 
         return null;
+    }
+
+    // get number of entries in DB.
+    public int getTotalEntries() throws SQLException {
+        String query = "SELECT COUNT(*) as count FROM regions";
+
+        try (Connection conn = connect();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("count");
+            }
+        }
+
+        return 0;
+    }
+
+    // Get the top labels found across all dataset entries.
+    public Map<String, Integer> getTopLabels(int limit) throws SQLException {
+
+        String query = "SELECT labels FROM regions";
+
+        // We will count with a map.
+        Map<String, Integer> labelCounts = new HashMap<>();
+
+        try (Connection conn = connect();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                String labels = resultSet.getString("labels");
+                String[] labelArray = labels.split(",");
+
+                for (String label : labelArray) {
+                    String trimmedLabel = label.trim();
+                    labelCounts.put(trimmedLabel, labelCounts.getOrDefault(trimmedLabel, 0) + 1);
+                }
+            }
+        }
+
+        return labelCounts.entrySet().stream() // Send hashmap as a stream of values.
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed()) // Sort entries by Ints in reverse (descending) order.
+                .limit(limit) // After sorting, cut off the top limit.
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new)); // Use LinkedHashMap to maintain order.
     }
 
 }

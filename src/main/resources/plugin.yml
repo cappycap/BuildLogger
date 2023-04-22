@@ -5,4 +5,4 @@ api-version: '1.19'
 commands:
   dataset:
     description: Handle dataset-related operations
-    usage: /<command> <help/add/view/stats>
+    usage: /<command> <help/add/view/paste/stats>

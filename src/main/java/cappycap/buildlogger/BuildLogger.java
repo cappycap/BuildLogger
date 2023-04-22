@@ -1,5 +1,7 @@
 package cappycap.buildlogger;
 
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,6 +14,11 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import org.bukkit.Location;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import org.bukkit.Bukkit;
+import java.sql.SQLException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +31,7 @@ public class BuildLogger extends JavaPlugin {
 
     private DatabaseHelper dbHelper;
 
-    static public TextComponent border = new TextComponent("----------------------------------------");
+    static public TextComponent border = new TextComponent("------------------------------------------------");
 
     static {
         border.setColor(ChatColor.GRAY);
@@ -153,7 +160,7 @@ public class BuildLogger extends JavaPlugin {
     }
 
     // Convert a matrix of block numbers back to a matrix of block IDs.
-    public String[][][] convertMatrixToBlockIds(String[][][] blockNumberMatrix) {
+    public String[][][] convertMatrixToBlockIds(int[][][] blockNumberMatrix) {
         int width = blockNumberMatrix.length;
         int height = blockNumberMatrix[0].length;
         int length = blockNumberMatrix[0][0].length;
@@ -162,14 +169,60 @@ public class BuildLogger extends JavaPlugin {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < length; z++) {
-                    int blockNumber = Integer.parseInt(blockNumberMatrix[x][y][z]);
-                    String blockId = numberToBlockId.getOrDefault(blockNumber, "minecraft:air");
+                    String blockId = numberToBlockId.getOrDefault(blockNumberMatrix[x][y][z], "minecraft:air");
                     blockIdMatrix[x][y][z] = blockId;
                 }
             }
         }
 
         return blockIdMatrix;
+    }
+
+    // Paste a region into the world.
+    public void pasteRegion(int id, Player player) {
+        try {
+            // Fetch the region data from the SQLite database.
+            String jsonData = dbHelper.getRegionData(id);
+            if (jsonData == null) {
+                player.sendMessage(ChatColor.RED + "Region with ID " + id + " not found.");
+                return;
+            }
+
+            // Convert the JSON string back into a 3D int matrix
+            int[][][] blockNumberMatrix = new Gson().fromJson(jsonData, int[][][].class);
+
+            // Convert the block number matrix to a block ID matrix
+            String[][][] blockIdMatrix = convertMatrixToBlockIds(blockNumberMatrix);
+
+            // Get the WorldEdit instance
+            WorldEdit worldEdit = WorldEdit.getInstance();
+
+            // Create a new EditSession for the player's world
+            try (EditSession editSession = worldEdit.newEditSession(BukkitAdapter.adapt(player.getWorld()))) {
+                // Get the player's position as the paste location
+                Location playerLoc = player.getLocation();
+                BlockVector3 pasteLocation = BlockVector3.at(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ());
+
+                // Iterate through the block ID matrix and set the blocks in the world
+                int width = blockIdMatrix.length;
+                int height = blockIdMatrix[0].length;
+                int length = blockIdMatrix[0][0].length;
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        for (int z = 0; z < length; z++) {
+                            String blockId = blockIdMatrix[x][y][z];
+                            BlockVector3 targetVector = pasteLocation.add(x, y, z);
+                            BlockStateHolder block = BukkitAdapter.adapt(Bukkit.createBlockData(blockId));
+                            editSession.setBlock(targetVector, block);
+                        }
+                    }
+                }
+            } catch (MaxChangedBlocksException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            getLogger().severe("Failed to fetch region data from the database: " + e.getMessage());
+        }
     }
 
 }
