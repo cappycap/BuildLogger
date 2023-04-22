@@ -24,7 +24,7 @@ public class BuildLogger extends JavaPlugin {
 
     private DatabaseHelper dbHelper;
 
-    static public TextComponent border = new TextComponent("--------------------");
+    static public TextComponent border = new TextComponent("----------------------------------------");
 
     static {
         border.setColor(ChatColor.GRAY);

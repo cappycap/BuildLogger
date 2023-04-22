@@ -68,6 +68,7 @@ public class DatasetCommand implements CommandExecutor, TabCompleter {
             } else if ("view".equalsIgnoreCase(subcommand) && sender instanceof Player) {
                 try {
                     viewRegion(sender, args[1]);
+                    return true;
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -87,11 +88,11 @@ public class DatasetCommand implements CommandExecutor, TabCompleter {
         if (result != null) {
 
             // Send the region data to the player or console.
-            TextComponent titleComponent = new TextComponent("Viewing dataset entry #");
+            TextComponent titleComponent = new TextComponent("Dataset ID: ");
             titleComponent.setColor(ChatColor.WHITE);
 
             TextComponent idComponent = new TextComponent(id);
-            titleComponent.setColor(ChatColor.YELLOW);
+            idComponent.setColor(ChatColor.YELLOW);
             titleComponent.addExtra(idComponent);
 
             // Dims.
