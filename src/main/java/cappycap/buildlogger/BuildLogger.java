@@ -25,10 +25,10 @@ public class BuildLogger extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        getLogger().info("BuildLogger initialized.");
+        getLogger().info("BuildLogger v"+this.getDescription().getVersion()+" initialized.");
 
         // Initialize database.
-        dbHelper = new DatabaseHelper("regions.db");
+        dbHelper = new DatabaseHelper("regions.db", this);
 
         // Register dataset commands.
         this.getCommand("dataset").setExecutor(new DatasetCommand(this));
@@ -54,7 +54,7 @@ public class BuildLogger extends JavaPlugin {
     }
 
     // Save a region's block information as a 3D integer matrix in the SQLite file.
-    public int recordRegion(CuboidRegion region, String labels) {
+    public CommandResult recordRegion(CuboidRegion region, String labels) {
 
         // Get the WorldEdit instance
         WorldEdit worldEdit = WorldEdit.getInstance();
@@ -69,10 +69,18 @@ public class BuildLogger extends JavaPlugin {
             ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
             Operations.completeLegacy(copy);
 
+            // Variables needed for representing region as matrix.
             int width = region.getWidth();
             int height = region.getHeight();
             int length = region.getLength();
+            int xMin = width;
+            int xMax = 0;
+            int yMin = height;
+            int yMax = 0;
+            int zMin = length;
+            int zMax = 0;
 
+            // Convert entire region to a matrix.
             int[][][] blocks = new int[width][height][length];
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -80,37 +88,53 @@ public class BuildLogger extends JavaPlugin {
 
                         // Calculate position of this block relative to minimum region point.
                         BlockVector3 targetVector = min.add(x, y, z);
-                        int xT = targetVector.getX();
-                        int yT = targetVector.getY();
-                        int zT = targetVector.getZ();
-                        String coordinates = String.format("X: %d, Y: %d, Z: %d", xT, yT, zT);
-                        getLogger().info("Looking at coordinates: " + coordinates);
 
                         // Acquire block's integer ID from HashMap.
                         String blockId = clipboard.getBlock(targetVector).getBlockType().getId();
                         int blockNumber = blockIdToNumber.getOrDefault(blockId, 0);
                         getLogger().info("Found "+blockNumber+" from "+blockId);
 
-                        // Record in dataset matrix.
+                        // Record in matrix.
                         blocks[x][y][z] = blockNumber;
 
+                        // Check if this block represents the corner of a shrunk matrix
+                        // as the first or last non-air block in a given dimension.
+                        if (blockNumber != 0) {
+                            xMin = Math.min(xMin, x);
+                            xMax = Math.max(xMax, x);
+                            yMin = Math.min(yMin, y);
+                            yMax = Math.max(yMax, y);
+                            zMin = Math.min(zMin, z);
+                            zMax = Math.max(zMax, z);
+                        }
                     }
                 }
             }
 
-            // Convert the 3D matrix to a JSON string.
-            String data = new Gson().toJson(blocks);
+            // Build our cleaned matrix.
+            int shrunkWidth = xMax - xMin + 1;
+            int shrunkHeight = yMax - yMin + 1;
+            int shrunkLength = zMax - zMin + 1;
+            int[][][] shrunkMatrix = new int[shrunkWidth][shrunkHeight][shrunkLength];
+            for (int x = xMin; x <= xMax; x++) {
+                for (int y = yMin; y <= yMax; y++) {
+                    for (int z = zMin; z <= zMax; z++) {
+                        shrunkMatrix[x - xMin][y - yMin][z - zMin] = blocks[x][y][z];
+                    }
+                }
+            }
 
-            getLogger().info("Data to save: "+data);
+            // Convert the matrix to a JSON string.
+            String data = new Gson().toJson(shrunkMatrix);
 
             // Save the JSON string and labels to the SQLite database.
-            return dbHelper.saveRegion(data, labels);
+            return dbHelper.saveRegion(data, labels, shrunkWidth, shrunkHeight, shrunkLength, width, height, length);
 
         } catch (Exception e) {
             getLogger().warning("Failed to copy region data: " + e.getMessage());
         }
 
-        return -1;
+        return null;
 
     }
 

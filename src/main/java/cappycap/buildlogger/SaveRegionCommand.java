@@ -6,7 +6,6 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
-import com.sk89q.worldedit.world.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -46,19 +45,42 @@ public class SaveRegionCommand implements CommandExecutor {
             try {
                 CuboidRegion region = getSelectedRegion(wePlugin, player);
                 if (region != null) {
-                    int id = plugin.recordRegion(region, labels);
+                    CommandResult result = plugin.recordRegion(region, labels);
 
+                    // Report ID.
                     TextComponent message = new TextComponent("Dataset entry saved with ID: ");
                     message.setColor(ChatColor.WHITE);
 
-                    TextComponent idComponent = new TextComponent(Integer.toString(id));
+                    TextComponent idComponent = new TextComponent(Integer.toString(result.insertedId));
                     idComponent.setColor(ChatColor.YELLOW);
-                    idComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, Integer.toString(id)));
+                    idComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, Integer.toString(result.insertedId)));
 
                     message.addExtra(idComponent);
 
+                    // Report old dimensions.
+                    TextComponent dimensionsMessage = new TextComponent("\nOld dimensions: ");
+                    dimensionsMessage.setColor(ChatColor.WHITE);
+
+                    TextComponent oldDimensions = new TextComponent(String.format("%dx%dx%d", result.xDimOld, result.yDimOld, result.zDimOld));
+                    oldDimensions.setColor(ChatColor.YELLOW);
+
+                    dimensionsMessage.addExtra(oldDimensions);
+
+                    // Report new dimensions.
+                    TextComponent newDimensionsMessage = new TextComponent("\nNew dimensions: ");
+                    newDimensionsMessage.setColor(ChatColor.WHITE);
+
+                    TextComponent newDimensions = new TextComponent(String.format("%dx%dx%d", result.xDim, result.yDim, result.zDim));
+                    newDimensions.setColor(ChatColor.YELLOW);
+
+                    newDimensionsMessage.addExtra(newDimensions);
+
+                    // Send.
                     sender.spigot().sendMessage(message);
+                    sender.spigot().sendMessage(dimensionsMessage);
+                    sender.spigot().sendMessage(newDimensionsMessage);
                     return true;
+
                 } else {
                     sender.sendMessage("No region selected.");
                 }
