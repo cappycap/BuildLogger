@@ -4,7 +4,7 @@
 
 BuildLogger connects with WorldEdit to allow production of 3D integer matrices representing Minecraft builds, which are saved in a SQLite database with user-prescribed labels. 
 
-These matrices will eventually be used to train an epic prompt-based artificial intelligence that can build what you ask of it!
+These matrices will eventually be used to train prompt-based AI that builds what you ask it to!
 
 ![how plugin works](/img/main.png)
 
