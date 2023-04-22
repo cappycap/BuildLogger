@@ -29,12 +29,15 @@ Capture whatever you want within the region! It could be a house, a tree, a benc
 Next, run this command and add a list a minimum of 5 but as many labels as you wish. Put your most accurate descriptors first, and more obscure ones after. Here are some examples:
 
 ![Modern House](/img/modern.jpg)
+
 `/dataset add house, modern, wood pillar, in-ground pool, two floors, small`
 
 ![Castle Arch](/img/castlearch.png)
+
 `/dataset add outpost, guard gate, stone bridge, castle, two towers, large`
 
 ![Watering Well](/img/well.png)
+
 `/dataset add water well, water hole, covered, bucket, stone, small`
 
 When capturing larger builds, use more labels to better describe what encapsulates the space, or split up the build into smaller dataset entries.
