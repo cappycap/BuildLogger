@@ -60,7 +60,7 @@ public class DatabaseHelper {
             if (rs.next()) {
                 int insertedId = rs.getInt(1);
                 LOGGER.info("Inserted row:\nid=" + insertedId + "\nlabels=" + labels + "\ndims="+xDim+"x"+yDim+"x"+zDim);
-                return new CommandResult(insertedId, xDim, yDim, zDim, xDimOld, yDimOld, zDimOld);
+                return new CommandResult(insertedId, labels, xDim, yDim, zDim, xDimOld, yDimOld, zDimOld);
             } else {
                 return null;
             }
@@ -68,6 +68,23 @@ public class DatabaseHelper {
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    public CommandResult getRegion(String id) throws SQLException {
+        String sql = "SELECT * FROM regions WHERE id = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return new CommandResult(resultSet.getInt("id"), resultSet.getString("labels"), resultSet.getInt("dim_x"), resultSet.getInt("dim_y"), resultSet.getInt("dim_z"), 0, 0, 0);
+                }
+            }
+        }
+
+        return null;
     }
 
 }

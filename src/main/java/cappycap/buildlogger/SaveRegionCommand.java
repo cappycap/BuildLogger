@@ -15,6 +15,7 @@ import org.bukkit.plugin.Plugin;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.w3c.dom.Text;
 
 import java.util.logging.Logger;
 
@@ -45,10 +46,11 @@ public class SaveRegionCommand implements CommandExecutor {
             try {
                 CuboidRegion region = getSelectedRegion(wePlugin, player);
                 if (region != null) {
+
                     CommandResult result = plugin.recordRegion(region, labels);
 
                     // Report ID.
-                    TextComponent message = new TextComponent("Dataset entry saved with ID: ");
+                    TextComponent message = new TextComponent("Saved dataset entry with ID: ");
                     message.setColor(ChatColor.WHITE);
 
                     TextComponent idComponent = new TextComponent(Integer.toString(result.insertedId));
@@ -57,28 +59,49 @@ public class SaveRegionCommand implements CommandExecutor {
 
                     message.addExtra(idComponent);
 
-                    // Report old dimensions.
-                    TextComponent dimensionsMessage = new TextComponent("\nOld dimensions: ");
-                    dimensionsMessage.setColor(ChatColor.WHITE);
-
-                    TextComponent oldDimensions = new TextComponent(String.format("%dx%dx%d", result.xDimOld, result.yDimOld, result.zDimOld));
-                    oldDimensions.setColor(ChatColor.YELLOW);
-
-                    dimensionsMessage.addExtra(oldDimensions);
-
-                    // Report new dimensions.
-                    TextComponent newDimensionsMessage = new TextComponent("\nNew dimensions: ");
-                    newDimensionsMessage.setColor(ChatColor.WHITE);
-
-                    TextComponent newDimensions = new TextComponent(String.format("%dx%dx%d", result.xDim, result.yDim, result.zDim));
-                    newDimensions.setColor(ChatColor.YELLOW);
-
-                    newDimensionsMessage.addExtra(newDimensions);
-
-                    // Send.
+                    // Send ID.
+                    sender.spigot().sendMessage(plugin.border);
                     sender.spigot().sendMessage(message);
-                    sender.spigot().sendMessage(dimensionsMessage);
-                    sender.spigot().sendMessage(newDimensionsMessage);
+
+                    if (result.xDim == result.xDimOld && result.yDim == result.yDimOld && result.zDim == result.zDimOld) {
+
+                        // Report dimensions.
+                        TextComponent newDimensionsMessage = new TextComponent("Dimensions: ");
+                        newDimensionsMessage.setColor(ChatColor.WHITE);
+
+                        TextComponent newDimensions = new TextComponent(String.format("%dx%dx%d", result.xDim, result.yDim, result.zDim));
+                        newDimensions.setColor(ChatColor.YELLOW);
+
+                        newDimensionsMessage.addExtra(newDimensions);
+
+                        sender.spigot().sendMessage(newDimensionsMessage);
+
+                    } else {
+                        // Report old dimensions.
+                        TextComponent dimensionsMessage = new TextComponent("Region dimensions: ");
+                        dimensionsMessage.setColor(ChatColor.WHITE);
+
+                        TextComponent oldDimensions = new TextComponent(String.format("%dx%dx%d", result.xDimOld, result.yDimOld, result.zDimOld));
+                        oldDimensions.setColor(ChatColor.YELLOW);
+
+                        dimensionsMessage.addExtra(oldDimensions);
+
+                        // Report new dimensions.
+                        TextComponent newDimensionsMessage = new TextComponent("Tidied dimensions: ");
+                        newDimensionsMessage.setColor(ChatColor.WHITE);
+
+                        TextComponent newDimensions = new TextComponent(String.format("%dx%dx%d", result.xDim, result.yDim, result.zDim));
+                        newDimensions.setColor(ChatColor.YELLOW);
+
+                        newDimensionsMessage.addExtra(newDimensions);
+
+                        sender.spigot().sendMessage(dimensionsMessage);
+                        sender.spigot().sendMessage(newDimensionsMessage);
+
+                    }
+
+                    sender.spigot().sendMessage(plugin.border);
+
                     return true;
 
                 } else {

@@ -1,5 +1,7 @@
 package cappycap.buildlogger;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -22,6 +24,12 @@ public class BuildLogger extends JavaPlugin {
 
     private DatabaseHelper dbHelper;
 
+    static public TextComponent border = new TextComponent("--------------------");
+
+    static {
+        border.setColor(ChatColor.GRAY);
+    }
+
     @Override
     public void onEnable() {
 
@@ -31,7 +39,9 @@ public class BuildLogger extends JavaPlugin {
         dbHelper = new DatabaseHelper("regions.db", this);
 
         // Register dataset commands.
-        this.getCommand("dataset").setExecutor(new DatasetCommand(this));
+        DatasetCommand datasetCommand = new DatasetCommand(this);
+        this.getCommand("dataset").setExecutor(datasetCommand);
+        this.getCommand("dataset").setTabCompleter(datasetCommand);
 
         // Build Material hashmaps for matrices.
         int index = 0;
@@ -46,6 +56,10 @@ public class BuildLogger extends JavaPlugin {
             }
         }
 
+    }
+
+    public DatabaseHelper getDatabaseHelper() {
+        return dbHelper;
     }
 
     @Override

@@ -9,8 +9,9 @@ public class CommandResult {
     public int xDimOld;
     public int yDimOld;
     public int zDimOld;
+    public String labels;
 
-    public CommandResult(int insertedId, int xDim, int yDim, int zDim, int xDimOld, int yDimOld, int zDimOld) {
+    public CommandResult(int insertedId, String labels, int xDim, int yDim, int zDim, int xDimOld, int yDimOld, int zDimOld) {
         this.insertedId = insertedId;
         this.xDim = xDim;
         this.yDim = yDim;
@@ -18,5 +19,6 @@ public class CommandResult {
         this.xDimOld = xDimOld;
         this.yDimOld = yDimOld;
         this.zDimOld = zDimOld;
+        this.labels = labels;
     }
 }
