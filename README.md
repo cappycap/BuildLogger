@@ -30,7 +30,7 @@ Next, run this command and add a list a minimum of 5 but as many labels as you w
 
 ![Modern House](/img/modern.jpg)
 
-`/dataset add house, modern, wood pillar, in-ground pool, two floors, small`
+`/dataset add house, modern, high ceilings, in-ground pool, three floors, large`
 
 ![Castle Arch](/img/castlearch.png)
 
