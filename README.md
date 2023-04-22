@@ -52,7 +52,7 @@ View the dimensions and label data for an entry.
 
 ### /dataset paste (id)
 
-Paste a dataset entry at your current position. Please be careful with this command as it can crash the server!
+Paste a dataset entry at your current position. Please be careful with this command as it can crash the server if you paste something too large!
 
 ![output of /dataset paste](/img/paste.gif)
 
